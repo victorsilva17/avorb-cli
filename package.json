@@ -1,0 +1,26 @@
+{
+  "name": "avorb",
+  "version": "0.1.0",
+  "author": "Victor H. Silva <victor.silva@ax4b.com>",
+  "license": "ISC",
+  "description": "CLI tool to create nextjs predefined structures",
+  "bin": {
+    "avorb": "bin/index.ts"
+  },
+  "scripts": {
+    "start": "bun run bin/index.ts"
+  },
+  "module": "bin/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/prompts": "^2.4.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/node": "^22.5.0",
+    "prompts": "^2.4.2"
+  }
+}
