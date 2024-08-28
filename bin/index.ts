@@ -263,6 +263,44 @@ function checkIfPageExists(targetDir: string, entityName: string): boolean {
   return fs.existsSync(pagePath);
 }
 
+// Function to add a new route to routes.tsx
+function addRouteToRoutesFile(entityName: string, targetDir: string) {
+  const routesFilePath = path.join(targetDir, "src", "routes.tsx");
+
+  if (!fs.existsSync(routesFilePath)) {
+    console.error("Error: routes.tsx file not found.");
+    return;
+  }
+
+  // Read the existing routes.tsx file
+  let routesFileContent = fs.readFileSync(routesFilePath, "utf-8");
+
+  // Find the insertion point for new route
+  const routesArrayEndIndex = routesFileContent.lastIndexOf("];");
+
+  if (routesArrayEndIndex === -1) {
+    console.error("Error: routes array not found in routes.tsx.");
+    return;
+  }
+
+  // Create the new route object to be added
+  const newRoute = `  {
+    icon: <TbTemplate size={24} />,
+    label: "CRUD ${entityName.charAt(0).toUpperCase() + entityName.slice(1)}",
+    url: "/v1/${entityName}",
+  },\n`;
+
+  // Insert the new route object before the closing of the routes array
+  routesFileContent =
+    routesFileContent.slice(0, routesArrayEndIndex) +
+    newRoute +
+    routesFileContent.slice(routesArrayEndIndex);
+
+  // Write the updated content back to routes.tsx
+  fs.writeFileSync(routesFilePath, routesFileContent);
+  console.log(`Route for ${entityName} added to routes.tsx!`);
+}
+
 // Main function
 async function main() {
   const [command, ...args] = process.argv.slice(2);
@@ -322,6 +360,7 @@ async function main() {
     createCrudFiles(targetDir, entityName);
     addPagesLayout(targetDir, entityName);
     addFakeDataToMockServer(`${entityName}s`, targetDir);
+    addRouteToRoutesFile(entityName, targetDir);
   } else {
     console.error(`Unknown command: ${command}`);
     process.exit(1);
