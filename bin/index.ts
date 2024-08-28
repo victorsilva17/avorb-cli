@@ -242,38 +242,6 @@ function addFakeDataToMockServer(entityName: string, targetDir: string) {
       email: "david.thomas@example.com",
       password: "dThomas#34",
     },
-    {
-      id: "6edb9d15-7f3b-48e4-87c5-cb9a63117c58",
-      firstName: "Ava",
-      lastName: "Moore",
-      age: 23,
-      email: "ava.moore@example.com",
-      password: "avaMoore23!",
-    },
-    {
-      id: "ef14df4d-bf27-4f96-b64c-6505b0450f30",
-      firstName: "Ethan",
-      lastName: "Jackson",
-      age: 35,
-      email: "ethan.jackson@example.com",
-      password: "eJackson35#",
-    },
-    {
-      id: "d42c0387-d4be-48ae-9d89-476eff8a6a1f",
-      firstName: "Abigail",
-      lastName: "White",
-      age: 21,
-      email: "abigail.white@example.com",
-      password: "abbyWhite21!",
-    },
-    {
-      id: "5a0e6481-4f69-423f-bb8b-efab45b5a5a0",
-      firstName: "Matthew",
-      lastName: "Harris",
-      age: 38,
-      email: "matt.harris@example.com",
-      password: "mattHarris36@",
-    },
   ];
 
   // Add the new array to the server data with the specified entity name
@@ -332,7 +300,7 @@ async function main() {
 
     const targetDir = process.cwd(); // Assume running from project root
     createCrudFiles(targetDir, entityName);
-    addFakeDataToMockServer(entityName, targetDir);
+    addFakeDataToMockServer(`${entityName}s`, targetDir);
   } else {
     console.error(`Unknown command: ${command}`);
     process.exit(1);
