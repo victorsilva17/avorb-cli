@@ -160,7 +160,10 @@ function createCrudFiles(targetDir: string, entityName: string) {
       } else {
         let content = fs.readFileSync(srcPath, "utf-8");
         content = content.replace(/sample/g, entityName);
-        content = content.replace(/Sample/g, entityName.charAt(0).toUpperCase() + entityName.slice(1));
+        content = content.replace(
+          /Sample/g,
+          entityName.charAt(0).toUpperCase() + entityName.slice(1),
+        );
         fs.writeFileSync(destPath, content);
         console.log(`Created: ${destPath}`);
       }
@@ -179,6 +182,23 @@ function createCrudFiles(targetDir: string, entityName: string) {
   copyAndRenameFiles(handlersDir, handlersDistDir);
   copyAndRenameFiles(modelsDir, modelsDistDisr);
   copyAndRenameFiles(pageDir, pageDistDir);
+
+  const layoutSrcFile = path.join(templateDir, "v1", "layout.tsx");
+  const layoutDistFile = path.join(targetDir, "src", "app", "v1", "layout.tsx");
+
+  // Ensure the destination directory exists
+  const layoutDistDir = path.dirname(layoutDistFile);
+  if (!fs.existsSync(layoutDistDir)) {
+    fs.mkdirSync(layoutDistDir, { recursive: true });
+  }
+
+  // Check if the file exists and copy it if it doesn't
+  if (!fs.existsSync(layoutDistFile)) {
+    fs.copyFileSync(layoutSrcFile, layoutDistFile);
+    console.log(`File copied from ${layoutSrcFile} to ${layoutDistFile}`);
+  } else {
+    console.log(`File already exists at ${layoutDistFile}, skipping copy.`);
+  }
 
   console.log(`CRUD structure for ${entityName} created successfully!`);
 }
