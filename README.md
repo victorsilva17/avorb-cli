@@ -7,7 +7,7 @@ Create a project:
 
 ```bash
 # Bun
-bunx avorb create "my-project"
+bunx avorb new-project "my-project"
 ```
 
 Create a new crud (i.e tasks)
