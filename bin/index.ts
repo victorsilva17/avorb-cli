@@ -95,46 +95,146 @@ function createStructure(projectPath: string, isBlank: boolean) {
       "../",
       "template",
       "example",
+      "v1",
     );
 
-    const appDir = path.join(projectPath, "src/app");
+    const templateExampleCoreDir = path.join(
+      __dirname,
+      "../",
+      "template",
+      "example",
+      "core",
+    );
+
+    const srcDir = path.join(projectPath, "src");
+    const appDir = path.join(srcDir, "app");
 
     fs.cpSync(templateExampleDir, appDir, { recursive: true });
+    fs.cpSync(templateExampleCoreDir, srcDir, { recursive: true });
   }
 
   console.log("Project structure created!");
 }
 
+// Function to edit package.json
+function editPackageJson(
+  projectPath: string,
+  customScripts: Record<string, string>,
+) {
+  const packageJsonPath = path.join(projectPath, "package.json");
+
+  if (fs.existsSync(packageJsonPath)) {
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+
+    // Merge custom scripts with existing scripts
+    packageJson.scripts = { ...packageJson.scripts, ...customScripts };
+
+    // Write the updated package.json back to disk
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    console.log("Custom scripts added to package.json!");
+  } else {
+    console.error("Error: package.json not found.");
+  }
+}
+
+// Function to create files and directories for new CRUD
+function createCrudFiles(targetDir: string, entityName: string) {
+  const templateDir = path.join(__dirname, "../", "template", "example");
+  if (!fs.existsSync(templateDir)) {
+    console.error(`Template directory not found at ${templateDir}`);
+    return;
+  }
+
+  // Copy and rename files
+  function copyAndRenameFiles(srcDir: string, destDir: string) {
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+
+    fs.readdirSync(srcDir).forEach((file) => {
+      const srcPath = path.join(srcDir, file);
+      let destPath = path.join(destDir, file.replace(/sample/g, entityName));
+
+      if (fs.statSync(srcPath).isDirectory()) {
+        copyAndRenameFiles(srcPath, destPath);
+      } else {
+        let content = fs.readFileSync(srcPath, "utf-8");
+        content = content.replace(/sample/g, entityName);
+        content = content.replace(/Sample/g, entityName.charAt(0).toUpperCase() + entityName.slice(1));
+        fs.writeFileSync(destPath, content);
+        console.log(`Created: ${destPath}`);
+      }
+    });
+  }
+
+  const handlersDir = path.join(templateDir, "core", "handlers");
+  const handlersDistDir = path.join(targetDir, "src", "core", "handlers");
+
+  const modelsDir = path.join(templateDir, "core", "models");
+  const modelsDistDisr = path.join(targetDir, "src", "core", "models");
+
+  const pageDir = path.join(templateDir, "v1", "sample");
+  const pageDistDir = path.join(targetDir, "src", "app", "v1", entityName);
+
+  copyAndRenameFiles(handlersDir, handlersDistDir);
+  copyAndRenameFiles(modelsDir, modelsDistDisr);
+  copyAndRenameFiles(pageDir, pageDistDir);
+
+  console.log(`CRUD structure for ${entityName} created successfully!`);
+}
+
 // Main function
 async function main() {
-  const response = await prompts([
-    {
-      type: "text",
-      name: "projectName",
-      message: "Project name:",
-      validate: (name) => (name ? true : "Project name cannot be empty"),
-    },
-    {
-      type: "select",
-      name: "template",
-      message: "Choose a template:",
-      choices: [
-        { title: "Blank Project", value: "blank" },
-        { title: "Example Project", value: "example" },
-      ],
-    },
-  ]);
+  const [command, ...args] = process.argv.slice(2);
 
-  const projectPath = path.join(process.cwd(), response.projectName);
+  if (command === "new-project") {
+    const projectName = args[0];
+    if (!projectName) {
+      console.error("Error: Project name is required.");
+      process.exit(1);
+    }
 
-  // Step 1: Create Next.js Project
-  await createNextApp(response.projectName);
+    const response = await prompts([
+      {
+        type: "select",
+        name: "template",
+        message: "Choose a template:",
+        choices: [
+          { title: "Blank Project", value: "blank" },
+          { title: "Example Project", value: "example" },
+        ],
+      },
+    ]);
 
-  // Step 2: Install Custom Dependencies
-  installDependencies(projectPath);
+    const projectPath = path.join(process.cwd(), projectName);
 
-  // Step 3: Create Project Structure
-  createStructure(projectPath, response.template === "blank");
+    // Step 1: Create Next.js Project
+    await createNextApp(projectName);
+
+    // Step 2: Install Custom Dependencies
+    installDependencies(projectPath);
+
+    // Step 3: Edit package.json to add custom scripts
+    const customScripts = {
+      server: "json-server --watch ./mock/server.json --port 3333",
+    };
+    editPackageJson(projectPath, customScripts);
+
+    // Step 4: Create Project Structure
+    createStructure(projectPath, response.template === "blank");
+  } else if (command == "new-crud") {
+    const entityName = args[0];
+    if (!entityName) {
+      console.error("Error: Entity name is required.");
+      process.exit(1);
+    }
+
+    const targetDir = process.cwd(); // Assume running from project root
+    createCrudFiles(targetDir, entityName);
+  } else {
+    console.error(`Unknown command: ${command}`);
+    process.exit(1);
+  }
 }
 
 // Run the CLI
