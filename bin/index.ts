@@ -182,6 +182,11 @@ function createCrudFiles(targetDir: string, entityName: string) {
   copyAndRenameFiles(handlersDir, handlersDistDir);
   copyAndRenameFiles(modelsDir, modelsDistDisr);
   copyAndRenameFiles(pageDir, pageDistDir);
+}
+
+// Function to copy the Layout.tsx file
+function addPagesLayout(targetDir: string, entityName: string) {
+  const templateDir = path.join(__dirname, "../", "template", "example");
 
   const layoutSrcFile = path.join(templateDir, "v1", "layout.tsx");
   const layoutDistFile = path.join(targetDir, "src", "app", "v1", "layout.tsx");
@@ -252,6 +257,12 @@ function addFakeDataToMockServer(entityName: string, targetDir: string) {
   console.log(`Added fake data for ${entityName} to server.json!`);
 }
 
+// Function to check if a page already exists
+function checkIfPageExists(targetDir: string, entityName: string): boolean {
+  const pagePath = path.join(targetDir, "src", "app", "v1", entityName);
+  return fs.existsSync(pagePath);
+}
+
 // Main function
 async function main() {
   const [command, ...args] = process.argv.slice(2);
@@ -299,7 +310,17 @@ async function main() {
     }
 
     const targetDir = process.cwd(); // Assume running from project root
+
+    // Check if the page already exists
+    if (checkIfPageExists(targetDir, entityName)) {
+      console.error(
+        `Error: A page named "${entityName}" already exists in src/app/v1/. Cannot create duplicate CRUD.`,
+      );
+      return; // Exit if the page already exists
+    }
+
     createCrudFiles(targetDir, entityName);
+    addPagesLayout(targetDir, entityName);
     addFakeDataToMockServer(`${entityName}s`, targetDir);
   } else {
     console.error(`Unknown command: ${command}`);
