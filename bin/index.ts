@@ -203,6 +203,87 @@ function createCrudFiles(targetDir: string, entityName: string) {
   console.log(`CRUD structure for ${entityName} created successfully!`);
 }
 
+// Function to add a new array to the server.json
+function addFakeDataToMockServer(entityName: string, targetDir: string) {
+  const mockServerPath = path.join(targetDir, "mock", "server.json");
+
+  // Check if the server.json file exists
+  if (!fs.existsSync(mockServerPath)) {
+    console.error("Error: server.json not found.");
+    return;
+  }
+
+  // Read the existing server.json file
+  const serverData = JSON.parse(fs.readFileSync(mockServerPath, "utf-8"));
+
+  // Define the fake data array to add
+  const fakeDataArray = [
+    {
+      id: "45f6402e-f4be-43e4-973c-b13bc5e9e949",
+      firstName: "Alexander",
+      lastName: "Wilson",
+      age: 33,
+      email: "alex.wilson@example.com",
+      password: "alexW@33!",
+    },
+    {
+      id: "2de875cc-c42e-4f25-b72a-9126cfe94ed2",
+      firstName: "Olivia",
+      lastName: "Anderson",
+      age: 22,
+      email: "olivia.anderson@example.com",
+      password: "OliviaA22#",
+    },
+    {
+      id: "81f39980-d3a7-43c4-a82c-78115d61e542",
+      firstName: "David",
+      lastName: "Thomas",
+      age: 34,
+      email: "david.thomas@example.com",
+      password: "dThomas#34",
+    },
+    {
+      id: "6edb9d15-7f3b-48e4-87c5-cb9a63117c58",
+      firstName: "Ava",
+      lastName: "Moore",
+      age: 23,
+      email: "ava.moore@example.com",
+      password: "avaMoore23!",
+    },
+    {
+      id: "ef14df4d-bf27-4f96-b64c-6505b0450f30",
+      firstName: "Ethan",
+      lastName: "Jackson",
+      age: 35,
+      email: "ethan.jackson@example.com",
+      password: "eJackson35#",
+    },
+    {
+      id: "d42c0387-d4be-48ae-9d89-476eff8a6a1f",
+      firstName: "Abigail",
+      lastName: "White",
+      age: 21,
+      email: "abigail.white@example.com",
+      password: "abbyWhite21!",
+    },
+    {
+      id: "5a0e6481-4f69-423f-bb8b-efab45b5a5a0",
+      firstName: "Matthew",
+      lastName: "Harris",
+      age: 38,
+      email: "matt.harris@example.com",
+      password: "mattHarris36@",
+    },
+  ];
+
+  // Add the new array to the server data with the specified entity name
+  serverData[entityName] = fakeDataArray;
+
+  // Write the updated JSON back to the server.json file
+  fs.writeFileSync(mockServerPath, JSON.stringify(serverData, null, 2));
+  console.log(`Added fake data for ${entityName} to server.json!`);
+}
+
 // Main function
 async function main() {
   const [command, ...args] = process.argv.slice(2);
@@ -251,6 +332,7 @@ async function main() {
 
     const targetDir = process.cwd(); // Assume running from project root
     createCrudFiles(targetDir, entityName);
+    addFakeDataToMockServer(entityName, targetDir);
   } else {
     console.error(`Unknown command: ${command}`);
     process.exit(1);
